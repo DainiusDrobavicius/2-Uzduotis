@@ -1,9 +1,9 @@
 # 2-Uzduotis
-# Mokinio galutinio balo skaičiuoklė
+# Studento galutinio balo skaičiuoklė
 Programa turi dvi skirtingas versijas, viena parašyta naudojant masyvus, kita - vektorius.
 
-Ijungus programą galima pasirinkti ar nuskaityti mokinius iš dokumento, ar surašyti mokinius programos eigoje.
+Ijungus programą galima pasirinkti ar nuskaityti studentus iš dokumento, ar surašyti studentus programos eigoje.
 
-Pasirinkus mokinius nuskaityti iš dokumento arba surašius visus mokinius programos eigoje klausiama ar skaičiuoti pažymių vidurkį ar medianą.
+Pasirinkus studentus nuskaityti iš dokumento arba surašius visus studentus programos eigoje klausiama ar skaičiuoti pažymių vidurkį ar medianą.
 
-Programos pabaigoje atspausdinami visu mokinių pažymių vidurkiai arba medianos
+Programos pabaigoje atspausdinami visu studentų pažymių vidurkiai arba medianos
