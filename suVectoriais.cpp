@@ -4,24 +4,23 @@
 #include <iomanip>
 #include <vector>
 #include <stdlib.h>
+#include <fstream>
+#include "Mokinys.h"
+#include <chrono>
+
 using namespace std;
 
-const int N = 1000;
-struct Mokinys
-{
-    string vardas;
-    string pavarde;
-    int egzaminas;
-    vector<int> nd;
-    int ndSK;
-    double galutinis;
-};
+const int N = 10000;
 
+void failoskaitymas(Mokinys mokinys[]);
 void nuskaitymas(Mokinys mokinys[], int &mokiniuSK);
 void galutinisVidurkis(Mokinys mokinys[], int mokiniuSK);
 void galutinisMediana(Mokinys mokinys[], int mokiniuSK);
 void spausdinimas(Mokinys mokinys[], int mokiniuSK, string gal1);
-
+void rusiavimas(Mokinys mokinys[], int mokiniuSK);
+void naujasFailas(int sk);
+void generuotoTvarkymas(int sk);
+//internete rasta funkcija atpazistanti ar string yra tik skaiciai--
 template <typename T>
 bool isNumber(T x)
 {
@@ -35,180 +34,231 @@ bool isNumber(T x)
     else
         return false;
 }
+//-----------------------------------------------------------------
 
 int main()
 {
     srand(time(NULL));
     Mokinys mokinys[N];
     int mokiniuSK = 0;
-    nuskaitymas(mokinys, mokiniuSK);
-    bool gal = true;
-    string gal1;
-    while (gal)
+    cout << "Ar norite generuoti faila?(taip/ne) ";
+    string ats;
+    cin >> ats;
+    if (ats == "taip")
     {
-        cout << "Norite medianos ar vidurkio ? [mediana/vidurkis] ";
-        string galutinis;
-        cin >> galutinis;
-        if (galutinis == "vidurkis")
-        {
-            galutinisVidurkis(mokinys, mokiniuSK);
-            gal1 = "Galutinis (Vid.)";
-            gal = false;
-        }
-        else if (galutinis == "mediana")
-        {
-            galutinisMediana(mokinys, mokiniuSK);
-            gal1 = "Galutinis (Med.)";
-            gal = false;
-        }
-        else
-        {
-            cout << "Ivedete bloga simboli" << endl;
-        }
+        int sk;
+        cout << "Kokio dydzio sugeneruoto failo norite?";
+        cin >> sk;
+        naujasFailas(sk);
+        generuotoTvarkymas(sk);
     }
-    spausdinimas(mokinys, mokiniuSK, gal1);
-}
+    else if (ats == "ne")
+    {
 
-void nuskaitymas(Mokinys mokinys[], int &mokiniuSK)
-{
-    int skM;
-    bool mok = true;
-    cout << "Iveskite kiek bus skirtingu mokiniu [maz. 1] ";
-    while (mok)
-    {
-        string skMM;
-        cin >> skMM;
-        if (isNumber(skMM) && stoi(skMM) >= 1)
+        nuskaitymas(mokinys, mokiniuSK);
+        bool gal = true;
+        string gal1;
+        // -------tikrinama ar reikia medianos ar vidurkio---------
+        while (gal)
         {
-            skM = stoi(skMM);
-            mokiniuSK = skM;
-            mok = false;
-        }
-        else
-        {
-            cout << "Ivedete bloga simboli arba maziau 1" << endl;
-            cout << "Iveskite kiek bus skirtingu mokiniu [maz. 1] ";
-        }
-    }
-    for (int i = 0; i < skM; i++)
-    {
-        int skEGZ;
-        bool patikrinimas = true;
-        string patikrinti;
-        cout << "Iveskite mokinio varda ";
-        cin >> mokinys[i].vardas;
-        cout << "Iveskite mokinio pavarde ";
-        cin >> mokinys[i].pavarde;
-        bool zodis = true;
-        while (zodis)
-        {
-            cout << "Ar norite, kad siam mokiniui egzamino ir namu darbu rezultatai butu generuojami atsitiktinai? [taip/ne] ";
-            cin >> patikrinti;
-            if (patikrinti == "ne")
+            cout << "Norite medianos ar vidurkio ? [mediana/vidurkis] ";
+            string galutinis;
+            cin >> galutinis;
+            if (galutinis == "vidurkis")
             {
-                cout << "Iveskite mokinio egzamino rezultata ";
-                while (patikrinimas)
-                {
-                    string ats;
-                    cin >> ats;
-                    if (isNumber(ats))
-                    {
-                        skEGZ = stoi(ats);
-                        mokinys[i].egzaminas = skEGZ;
-                        patikrinimas = false;
-                    }
-                    else
-                    {
-                        cout << "Ivedete bloga simboli" << endl;
-                        cout << "Iveskite mokinio egzamino rezultata ";
-                    }
-                }
-                cout << "Iveskite kiek namu darbu pazymiu norite ivesti, jei nezinote kiek - iveskite zodi [nezinau] ";
-                patikrinimas = true;
-                while (patikrinimas)
-                {
-                    string ats;
-                    cin >> ats;
-                    if (isNumber(ats))
-                    {
-                        int sk = stoi(ats);
-                        int j = 0;
-                        string ats1;
-                        while (j < sk)
-                        {
-                            bool paz = true;
-                            while (paz)
-                            {
-                                cout << "Iveskite " << j + 1 << " namu darbo pazymi ";
-                                cin >> ats1;
-                                if (isNumber(ats1))
-                                {
-                                    int ats11 = stoi(ats1);
-                                    mokinys[i].nd.push_back(ats11);
-                                    paz = false;
-                                    j++;
-                                }
-                                else
-                                {
-                                    cout << "Ivedete bloga simboli" << endl;
-                                }
-                            }
-                        }
-
-                        patikrinimas = false;
-                    }
-                    else if (ats == "nezinau")
-                    {
-                        bool baigta = true;
-                        int ndSK = 0;
-                        while (baigta)
-                        {
-                            cout << "Iveskite " << ndSK + 1 << " namu darbu pazymi, jei norite baigti - Iveskite zodi [viskas] ";
-                            string nddd;
-                            cin >> nddd;
-                            if (isNumber(nddd) && stoi(nddd) <= 10 && stoi(nddd) >= 1)
-                            {
-                                mokinys[i].nd.push_back(stoi(nddd));
-                                ndSK++;
-                            }
-                            else if (nddd == "viskas")
-                            {
-                                baigta = false;
-                            }
-                            else
-                            {
-                                cout << "Ivedete bloga simboli" << endl;
-                            }
-                        }
-                        patikrinimas = false;
-                    }
-                    else
-                    {
-                        cout << "Ivedete bloga simboli" << endl;
-                        cout << "Iveskite kiek namu darbu pazymiu norite ivesti, jei nezinote kiek - Iveskite zodi [nezinau] ";
-                    }
-                }
-                zodis = false;
+                galutinisVidurkis(mokinys, mokiniuSK);
+                gal1 = "Galutinis (Vid.)";
+                gal = false;
             }
-            else if (patikrinti == "taip")
+            else if (galutinis == "mediana")
             {
-                mokinys[i].egzaminas = rand() % 10 + 1;
-                int pazymiuKiekis = rand() % 20;
-                mokinys[i].ndSK = pazymiuKiekis;
-                for (int k = 0; k < pazymiuKiekis; k++)
-                {
-                    mokinys[i].nd.push_back(rand() % 10 + 1);
-                }
-                zodis = false;
+                galutinisMediana(mokinys, mokiniuSK);
+                gal1 = "Galutinis (Med.)";
+                gal = false;
             }
             else
             {
                 cout << "Ivedete bloga simboli" << endl;
             }
         }
+        // ----------------------------------------------------------
+        rusiavimas(mokinys, mokiniuSK);
+        spausdinimas(mokinys, mokiniuSK, gal1);
     }
 }
 
+// nuskaito duomenis---------------------------------------------
+void nuskaitymas(Mokinys mokinys[], int &mokiniuSK)
+{
+    int skM;
+    bool mok = true;
+    bool good = true;
+    string failas;
+    //tikrina ar norima nuskaityti duomenis is failo ir irasyti paciam ir ar nera blogu simboliu
+    while (good)
+    {
+        cout << "Ar norite duomenis nuskaityti is failo [taip/ne] ";
+        cin >> failas;
+        // jei pasirinkta "taip" prasides failo nuskaitymas
+        if (failas == "taip")
+        {
+            mokiniuSK = N;
+            failoskaitymas(mokinys);
+            good = false;
+        }
+        // jei pasirinkta "ne" prasides duomenu ivedimas
+        else if (failas == "ne")
+        {
+            while (mok)
+            {
+                cout << "Iveskite kiek bus skirtingu mokiniu [maz. 1] ";
+                string skMM;
+                cin >> skMM;
+                if (isNumber(skMM) && stoi(skMM) >= 1)
+                {
+                    skM = stoi(skMM);
+                    mokiniuSK = skM;
+                    mok = false;
+                }
+                else
+                {
+                    cout << "Ivedete bloga simboli arba maziau 1" << endl;
+                }
+            }
+            for (int i = 0; i < skM; i++)
+            {
+                int skEGZ;
+                bool patikrinimas = true;
+                string patikrinti;
+                cout << "Iveskite mokinio varda ";
+                cin >> mokinys[i].vardas;
+                cout << "Iveskite mokinio pavarde ";
+                cin >> mokinys[i].pavarde;
+                bool zodis = true;
+                // patikrina ar ivesta taip/ne ir ar neivesta netinkamu simboliu arba kitu zodziu
+                while (zodis)
+                {
+                    cout << "Ar norite, kad siam mokiniui egzamino ir namu darbu rezultatai butu generuojami atsitiktinai? [taip/ne] ";
+                    cin >> patikrinti;
+                    // jei ivesta ne pradeda klausineti rezultatu
+                    if (patikrinti == "ne")
+                    {
+                        cout << "Iveskite mokinio egzamino rezultata ";
+                        // praso egzamino rezultato ir tikrina ar ivestas teisingas simbolis
+                        while (patikrinimas)
+                        {
+                            string ats;
+                            cin >> ats;
+                            if (isNumber(ats))
+                            {
+                                skEGZ = stoi(ats);
+                                mokinys[i].egzaminas = skEGZ;
+                                patikrinimas = false;
+                            }
+                            else
+                            {
+                                cout << "Ivedete bloga simboli" << endl;
+                                cout << "Iveskite mokinio egzamino rezultata ";
+                            }
+                        }
+                        cout << "Iveskite kiek namu darbu pazymiu norite ivesti, jei nezinote kiek - iveskite zodi [nezinau] ";
+                        patikrinimas = true;
+                        //tikrina kiek namu darbu reiks ivesti siam mokiniui arba pasirenkama, kad nezino ir tikrina ar neivesta netinkamu simboliu
+                        while (patikrinimas)
+                        {
+                            string ats;
+                            cin >> ats;
+                            if (isNumber(ats))
+                            {
+                                int sk = stoi(ats);
+                                int j = 0;
+                                string ats1;
+                                while (j < sk)
+                                {
+                                    bool paz = true;
+                                    while (paz)
+                                    {
+                                        cout << "Iveskite " << j + 1 << " namu darbo pazymi ";
+                                        cin >> ats1;
+                                        if (isNumber(ats1))
+                                        {
+                                            int ats11 = stoi(ats1);
+                                            mokinys[i].nd.push_back(ats11);
+                                            paz = false;
+                                            j++;
+                                        }
+                                        else
+                                        {
+                                            cout << "Ivedete bloga simboli" << endl;
+                                        }
+                                    }
+                                }
+
+                                patikrinimas = false;
+                            }
+                            // jei buvo pasirinkta kad nezino kiek namu darbu pazymiu reiks ivesti pradeda juos ivedineti tol, kol bus parasyta 'viskas'
+                            else if (ats == "nezinau")
+                            {
+                                bool baigta = true;
+                                int ndSK = 0;
+                                while (baigta)
+                                {
+                                    cout << "Iveskite " << ndSK + 1 << " namu darbu pazymi, jei norite baigti - Iveskite zodi [viskas] ";
+                                    string nddd;
+                                    cin >> nddd;
+                                    if (isNumber(nddd) && stoi(nddd) <= 10 && stoi(nddd) >= 1)
+                                    {
+                                        mokinys[i].nd.push_back(stoi(nddd));
+                                        ndSK++;
+                                    }
+                                    else if (nddd == "viskas")
+                                    {
+                                        baigta = false;
+                                    }
+                                    else
+                                    {
+                                        cout << "Ivedete bloga simboli" << endl;
+                                    }
+                                }
+                                patikrinimas = false;
+                            }
+                            else
+                            {
+                                cout << "Ivedete bloga simboli" << endl;
+                                cout << "Iveskite kiek namu darbu pazymiu norite ivesti, jei nezinote kiek - Iveskite zodi [nezinau] ";
+                            }
+                        }
+                        zodis = false;
+                    }
+                    // jei buvo pasirinkta generuoti pazymius
+                    else if (patikrinti == "taip")
+                    {
+                        mokinys[i].egzaminas = rand() % 10 + 1;
+                        int pazymiuKiekis = rand() % 20;
+                        for (int k = 0; k < pazymiuKiekis; k++)
+                        {
+                            mokinys[i].nd.push_back(rand() % 10 + 1);
+                        }
+                        zodis = false;
+                    }
+                    else
+                    {
+                        cout << "Ivedete bloga simboli" << endl;
+                    }
+                }
+            }
+
+            good = false;
+        }
+        else
+        {
+            cout << "Ivedete bloga simboli";
+        }
+    }
+}
+//----------------------------------------------------------------------------------------
+
+// ---------------------apskaiciuoja galutini vidurki-------------------------------------
 void galutinisVidurkis(Mokinys mokinys[], int mokiniuSK)
 {
     for (int i = 0; i < mokiniuSK; i++)
@@ -221,7 +271,9 @@ void galutinisVidurkis(Mokinys mokinys[], int mokiniuSK)
         mokinys[i].galutinis = 0.4 * (sum / mokinys[i].nd.size()) + 0.6 * mokinys[i].egzaminas;
     }
 }
+//------------------------------------------------------------------------------------------
 
+//------------------------apskaiciuoja galutine mediana-------------------------------------
 void galutinisMediana(Mokinys mokinys[], int mokiniuSK)
 {
     for (int i = 0; i < mokiniuSK; i++)
@@ -237,7 +289,9 @@ void galutinisMediana(Mokinys mokinys[], int mokiniuSK)
         }
     }
 }
+//--------------------------------------------------------------------------------------------
 
+//----------------------spausdina duomenis----------------------------------------------------
 void spausdinimas(Mokinys mokinys[], int mokiniuSK, string gal1)
 {
     cout << setw(15) << left << "Pavarde";
@@ -252,3 +306,112 @@ void spausdinimas(Mokinys mokinys[], int mokiniuSK, string gal1)
         cout << endl;
     }
 }
+//--------------------------------------------------------------------------------------------
+
+//-----------------------nuskaito duomenis is failo-------------------------------------------
+void failoskaitymas(Mokinys mokinys[])
+{
+    string laikinas;
+    int pazymiuSK = 0;
+    ifstream GET("kursiokai.txt");
+    GET >> laikinas >> laikinas;
+    GET >> laikinas;
+    while (laikinas.rfind("ND", 0) == 0)
+    {
+        pazymiuSK++;
+        GET >> laikinas;
+    }
+    for (int i = 0; i < N; i++)
+    {
+        GET >> laikinas;
+        mokinys[i].vardas = laikinas;
+        GET >> laikinas;
+        mokinys[i].pavarde = laikinas;
+        for (int j = 0; j < pazymiuSK; j++)
+        {
+            GET >> laikinas;
+            mokinys[i].nd.push_back(stoi(laikinas));
+        }
+        GET >> laikinas;
+        mokinys[i].egzaminas = stoi(laikinas);
+    }
+    GET.close();
+}
+//--------------------------------------------------------------------------------------------
+
+//--------------------mokiniu rusiavimas------------------------------------------------------
+void rusiavimas(Mokinys mokinys[], int mokiniuSK)
+{
+    for (int i = 0; i < mokiniuSK - 1; i++)
+    {
+        for (int j = 0; j < mokiniuSK - i - 1; j++)
+        {
+            if (mokinys[j].pavarde > mokinys[j + 1].pavarde)
+            {
+                swap(mokinys[j], mokinys[j + 1]);
+            }
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------
+
+//------------------naujas failas-------------------------------------------------------------
+
+void naujasFailas(int sk)
+{
+    auto start = chrono::system_clock::now();
+    ofstream file("generuotas.txt");
+    for (int i = 1; i <= sk; i++)
+    {
+        file << "Vardas" << i << " Pavarde" << i << " " << rand() % 10 + 1 << " " << rand() % 10 + 1 << " " << rand() % 10 + 1 << " " << rand() % 10 + 1 << " " << rand() % 10 + 1 << " " << rand() % 10 + 1 << " " << rand() % 10 + 1 << " " << rand() % 10 + 1 << endl;
+    }
+    file.close();
+    auto end = std::chrono::system_clock::now();
+    auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    cout << "Failo kurimas uztruko " << elapsed.count() << '\n';
+}
+
+//--------------------------------------------------------------------------------------------
+
+//--------------generuoto failo nuskaitymas ir rusiavimas-------------------------------------
+void generuotoTvarkymas(int sk)
+{
+    auto start = chrono::system_clock::now();
+    ifstream file("generuotas.txt");
+    ofstream vargsiukai("vargsiukai.txt");
+    ofstream galvociai("galvociai.txt");
+    for (int i = 0; i < sk; i++)
+    {
+        string vardas;
+        string pavarde;
+        int balas = 0;
+        int balas1;
+        int vidurkis;
+        int egz;
+        float rez;
+        file >> vardas;
+        file >> pavarde;
+        for (int j = 0; j < 7; j++)
+        {
+            file >> balas1;
+            balas += balas1;
+        }
+        file >> egz;
+        vidurkis = balas / 7;
+        rez = 0.4 * vidurkis + 0.6 * egz;
+        if (rez < 5)
+        {
+            vargsiukai << vardas << " " << pavarde << " " << rez << endl;
+        }
+        else
+        {
+            galvociai << vardas << " " << pavarde << " " << rez << endl;
+        }
+    }
+
+    auto end = std::chrono::system_clock::now();
+    auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    cout << "Failo tvarkymas uztruko " << elapsed.count() << '\n';
+}
+
+//--------------------------------------------------------------------------------------------
